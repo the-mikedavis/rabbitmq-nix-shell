@@ -31,6 +31,8 @@
             python3
             perf-test
             (writeShellScriptBin "open" '' exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" '')
+            erlangR25
+            elixir_1_13
           ];
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
