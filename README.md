@@ -26,6 +26,8 @@ The resulting shell has
 * `linkbazelrc`, a shell script that creates a symblink to a generated `user.bazelrc`
     * this `user.bazelrc` sets up the correct Erlang, Elixir, and Java variables
     * use this in each project repository built by bazel (`rabbitmq-server`, `ra`, `osiris`, etc.)
+* `perf` for profiling OTP
+* `mkflamegraph` for generating flamegraphs from `perf` data
 
 ### TODO
 

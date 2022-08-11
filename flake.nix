@@ -9,9 +9,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.utils.follows = "utils";
     };
+    flamegraph-src = {
+      url = "github:brendangregg/FlameGraph";
+      flake = false;
+    };
   };
 
-  outputs = { nixpkgs, utils, rabbitmq-perf-test, ... }:
+  outputs = { nixpkgs, utils, rabbitmq-perf-test, flamegraph-src, ... }:
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -22,6 +26,7 @@
         };
         erlang = pkgs.erlangR25;
         java = pkgs.openjdk;
+        inherit (pkgs.linuxPackages-libre) perf;
         java-version = builtins.elemAt (builtins.match "([[:digit:]]+).*" java.version) 0;
         user-bazelrc-text = pkgs.writeText "user.bazelrc" ''
           build:local --@rules_erlang//:erlang_home=${erlang}/lib/erlang
@@ -63,6 +68,25 @@
         openWrapper = pkgs.writeShellScriptBin "open" ''
           exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
         '';
+        mkflamegraph = pkgs.writeShellScriptBin "mkflamegraph" ''
+          WORK_DIR=`mktemp -d`
+          if [[ ! "$WORK_DIR" || ! -d "$WORK_DIR" ]]; then
+            echo "Could not create temp dir"
+            exit 1
+          fi
+          function cleanup {
+            rm -rf "$WORK_DIR"
+          }
+          trap cleanup EXIT
+
+          ${perf}/bin/perf script > "$WORK_DIR"/out.perf
+          # Collapse multiline stacks into single lines
+          ${pkgs.perl}/bin/perl ${flamegraph-src + /stackcollapse-perf.pl} "$WORK_DIR"/out.perf > "$WORK_DIR"/out.folded
+          # Merge scheduler profile data
+          ${pkgs.gnused}/bin/sed -e 's/^[0-9]\+_//' "$WORK_DIR"/out.folded > "$WORK_DIR"/out.folded_sched
+          # Create the SVG file
+          ${pkgs.perl}/bin/perl ${flamegraph-src + /flamegraph.pl} --title="CPU Flame Graph" "$WORK_DIR"/out.folded_sched > flamegraph.svg
+        '';
       in {
         devShells.default = pkgs.mkShell {
           packages = [
@@ -72,9 +96,11 @@
             pkgs.openssl
             pkgs.python3
             pkgs.perf-test
+            perf
             java
             linkbazelrc
             openWrapper
+            mkflamegraph
           ];
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
