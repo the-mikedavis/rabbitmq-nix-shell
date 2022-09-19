@@ -1,6 +1,5 @@
-*
-!.gitignore
-!flake.nix
-!flake.lock
-!README.md
-!LICENSE
+.direnv
+.envrc
+/*/
+!/bazel_5/
+*.erlang_ls.config

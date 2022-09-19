@@ -24,6 +24,14 @@
             (_final: _prev: { inherit (rabbitmq-perf-test.packages.${system}) perf-test; })
           ];
         };
+        bazel_5 = pkgs.callPackage ./bazel_5 {
+          inherit (pkgs.darwin) cctools;
+          inherit (pkgs.darwin.apple_sdk.frameworks) CoreFoundation CoreServices Foundation;
+          buildJdk = pkgs.jdk11_headless;
+          runJdk = pkgs.jdk11_headless;
+          stdenv = if pkgs.stdenv.cc.isClang then pkgs.llvmPackages.stdenv else pkgs.stdenv;
+          bazel_self = pkgs.bazel_5;
+        };
         erlang = pkgs.erlangR25;
         elixir = pkgs.elixir_1_13;
         rebar3 = (pkgs.rebar3.overrideAttrs (prev: { buildInputs = [ erlang ]; }));
@@ -93,7 +101,7 @@
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.gnumake
-            pkgs.bazel_5
+            bazel_5
             pkgs.mandoc
             pkgs.openssl
             pkgs.python3
