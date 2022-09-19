@@ -25,13 +25,15 @@
           ];
         };
         erlang = pkgs.erlangR25;
+        elixir = pkgs.elixir_1_13;
+        rebar3 = (pkgs.rebar3.overrideAttrs (prev: { buildInputs = [ erlang ]; }));
         java = pkgs.openjdk;
         inherit (pkgs.linuxPackages-libre) perf;
         java-version = builtins.elemAt (builtins.match "([[:digit:]]+).*" java.version) 0;
         user-bazelrc-text = pkgs.writeText "user.bazelrc" ''
           build:local --@rules_erlang//:erlang_home=${erlang}/lib/erlang
           build:local --@rules_erlang//:erlang_version=${erlang.version}
-          build:local --//:elixir_home=${pkgs.elixir_1_13}/lib/elixir
+          build:local --//:elixir_home=${elixir}/lib/elixir
 
           build --tool_java_language_version=${java-version}
           build --tool_java_runtime_version=local_jdk
@@ -97,6 +99,9 @@
             pkgs.python3
             pkgs.perf-test
             perf
+            erlang
+            rebar3
+            elixir
             java
             linkbazelrc
             openWrapper
