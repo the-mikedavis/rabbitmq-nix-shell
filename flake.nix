@@ -111,17 +111,13 @@
             pkgs.mandoc
             pkgs.openssl
             pkgs.python3
-            pkgs.perf-test
-            perf
-            pkgs.hotspot
             erlang
             rebar3
             elixir
             java
             linkbazelrc
             openWrapper
-            mkflamegraph
-          ];
+          ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [perf mkflamegraph pkgs.perf-test pkgs.hotspot]);
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
 
