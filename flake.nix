@@ -110,6 +110,9 @@
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
 
+            # enable profiling support with the JIT on Linux
+            export RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="+JPperf true"
+
             # This is used by perf-test. I can't tell what sets it in the first place :/
             unset SIZE
           '';
