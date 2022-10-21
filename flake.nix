@@ -32,7 +32,13 @@
           stdenv = if pkgs.stdenv.cc.isClang then pkgs.llvmPackages.stdenv else pkgs.stdenv;
           bazel_self = pkgs.bazel_5;
         };
-        erlang = pkgs.erlangR25;
+        erlang-src = pkgs.fetchFromGitHub {
+          owner = "erlang";
+          repo = "otp";
+          rev = "OTP-25.0.4";
+          sha256 = "sha256-bC93rEMjdqH/OQsEcDeKfFlAXIIWVanN1ewDdCECdC4=";
+        };
+        erlang = pkgs.erlangR25.override { src = erlang-src; version = "25.0.4"; };
         elixir = pkgs.elixir_1_13;
         rebar3 = (pkgs.rebar3.overrideAttrs (prev: { buildInputs = [ erlang ]; }));
         java = pkgs.openjdk;
