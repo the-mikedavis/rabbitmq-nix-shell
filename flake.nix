@@ -40,7 +40,7 @@
         };
         erlang = pkgs.erlangR25.override { src = erlang-src; version = "25.0.4"; };
         elixir = pkgs.elixir_1_13;
-        rebar3 = (pkgs.rebar3.overrideAttrs (prev: { buildInputs = [ erlang ]; }));
+        rebar3 = (pkgs.rebar3.overrideAttrs (prev: { buildInputs = [ erlang ]; doCheck = false; }));
         java = pkgs.openjdk;
         inherit (pkgs.linuxPackages-libre) perf;
         java-version = builtins.elemAt (builtins.match "([[:digit:]]+).*" java.version) 0;
