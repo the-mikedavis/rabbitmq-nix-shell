@@ -78,11 +78,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1659465044,
-        "narHash": "sha256-zfQxcHGWqi9eElCa+HHnkwDOgsTEZYJ2HjCxzvNUXCQ=",
+        "lastModified": 1666384409,
+        "narHash": "sha256-SKtUD/BbdZ/S4ysdtChHS7WOVAv9Ql3ixjrwkt7WJhk=",
         "owner": "the-mikedavis",
         "repo": "rabbitmq-perf-test",
-        "rev": "8a728f1595655d81d9223afa76a8ae681e6fade6",
+        "rev": "6c69e34ad6bc40621d41a00732ee05f157783191",
         "type": "github"
       },
       "original": {
