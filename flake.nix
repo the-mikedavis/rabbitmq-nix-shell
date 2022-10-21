@@ -113,6 +113,7 @@
             pkgs.python3
             pkgs.perf-test
             perf
+            pkgs.hotspot
             erlang
             rebar3
             elixir
