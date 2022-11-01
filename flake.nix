@@ -117,6 +117,10 @@
             java
             linkbazelrc
             openWrapper
+            # For building OTP by hand:
+            pkgs.ncurses
+            pkgs.libxml2
+            pkgs.libxslt
           ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [perf mkflamegraph pkgs.perf-test pkgs.hotspot]);
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
