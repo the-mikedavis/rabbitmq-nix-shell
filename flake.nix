@@ -85,6 +85,8 @@
           exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
         '';
         mkflamegraph = pkgs.writeShellScriptBin "mkflamegraph" ''
+          PERF_DATA_FILE="''${1:-perf.data}"
+          FLAMEGRAPH_FILE="''${2:-flamegraph.svg}"
           WORK_DIR=`mktemp -d`
           if [[ ! "$WORK_DIR" || ! -d "$WORK_DIR" ]]; then
             echo "Could not create temp dir"
@@ -95,13 +97,13 @@
           }
           trap cleanup EXIT
 
-          ${perf}/bin/perf script > "$WORK_DIR"/out.perf
+          ${perf}/bin/perf script --input="$PERF_DATA_FILE" > "$WORK_DIR"/out.perf
           # Collapse multiline stacks into single lines
           ${pkgs.perl}/bin/perl ${flamegraph-src + /stackcollapse-perf.pl} "$WORK_DIR"/out.perf > "$WORK_DIR"/out.folded
           # Merge scheduler profile data
           ${pkgs.gnused}/bin/sed -e 's/^[0-9]\+_//' "$WORK_DIR"/out.folded > "$WORK_DIR"/out.folded_sched
           # Create the SVG file
-          ${pkgs.perl}/bin/perl ${flamegraph-src + /flamegraph.pl} --title="CPU Flame Graph" "$WORK_DIR"/out.folded_sched > flamegraph.svg
+          ${pkgs.perl}/bin/perl ${flamegraph-src + /flamegraph.pl} --title="CPU Flame Graph" "$WORK_DIR"/out.folded_sched > "$FLAMEGRAPH_FILE"
         '';
       in {
         devShells.default = pkgs.mkShell {
