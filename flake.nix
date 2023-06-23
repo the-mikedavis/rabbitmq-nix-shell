@@ -123,6 +123,8 @@
             pkgs.ncurses
             pkgs.libxml2
             pkgs.libxslt
+            # YAML generation/manipulation for testing in k8s
+            pkgs.ytt
           ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [perf mkflamegraph pkgs.perf-test pkgs.hotspot]);
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
