@@ -4,83 +4,26 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
-    rabbitmq-perf-test = {
-      url = "github:the-mikedavis/rabbitmq-perf-test/flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.utils.follows = "utils";
-    };
     flamegraph-src = {
       url = "github:brendangregg/FlameGraph";
       flake = false;
     };
   };
 
-  outputs = { nixpkgs, utils, rabbitmq-perf-test, flamegraph-src, ... }:
+  outputs = { nixpkgs, utils, flamegraph-src, ... }:
     utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            (_final: _prev: { inherit (rabbitmq-perf-test.packages.${system}) perf-test; })
-          ];
-        };
-        bazel_5 = pkgs.callPackage ./bazel_5 {
-          inherit (pkgs.darwin) cctools;
-          inherit (pkgs.darwin.apple_sdk.frameworks) CoreFoundation CoreServices Foundation;
-          buildJdk = pkgs.jdk11_headless;
-          runJdk = pkgs.jdk11_headless;
-          stdenv = if pkgs.stdenv.cc.isClang then pkgs.llvmPackages.stdenv else pkgs.stdenv;
-          bazel_self = pkgs.bazel_5;
-        };
-        erlang-src = pkgs.fetchFromGitHub {
-          owner = "erlang";
-          repo = "otp";
-          rev = "OTP-25.0.4";
-          sha256 = "sha256-bC93rEMjdqH/OQsEcDeKfFlAXIIWVanN1ewDdCECdC4=";
-        };
-        erlang = pkgs.erlangR25.override { src = erlang-src; version = "25.0.4"; };
-        elixir = pkgs.elixir_1_13;
-        rebar3 = (pkgs.rebar3.overrideAttrs (prev: { buildInputs = [ erlang ]; doCheck = false; }));
+        pkgs = import nixpkgs { inherit system; };
         java = pkgs.openjdk;
+        # TODO figure out the graalvm building process...
+        perf-test-jar = pkgs.fetchurl {
+          url = "https://github.com/rabbitmq/rabbitmq-perf-test/releases/download/v2.19.0/perf-test-2.19.0.jar";
+          sha256 = "sha256-kgU/JpS5iPHMR2B+6+fzZT2l/Y1X16+RWCYhSnykrNU=";
+        };
+        perf-test = pkgs.writeShellScriptBin "perf-test" ''
+          ${java}/bin/java -jar ${perf-test-jar} "$@"
+        '';
         inherit (pkgs.linuxPackages-libre) perf;
-        java-version = builtins.elemAt (builtins.match "([[:digit:]]+).*" java.version) 0;
-        user-bazelrc-text = pkgs.writeText "user.bazelrc" ''
-          build:local --@rules_erlang//:erlang_home=${erlang}/lib/erlang
-          build:local --@rules_erlang//:erlang_version=${erlang.version}
-          build:local --//:elixir_home=${elixir}/lib/elixir
-
-          build --tool_java_language_version=${java-version}
-          build --tool_java_runtime_version=local_jdk
-
-          # rabbitmqctl wait shells out to 'ps', which is broken in the bazel macOS
-          # sandbox (https://github.com/bazelbuild/bazel/issues/7448)
-          # adding "--spawn_strategy=local" to the invocation is a workaround
-          build --spawn_strategy=local
-
-          # --experimental_strict_action_env breaks memory size detection on macOS,
-          # so turn it off for local runs
-          build --noexperimental_strict_action_env
-          build:buildbuddy --experimental_strict_action_env
-
-          # don't re-run flakes automatically on the local machine
-          build --flaky_test_attempts=1
-
-          # Always run locally. Remote builds seem to be broken because of /bin/bash replacements.
-          build --config=local
-
-          # build:buildbuddy --remote_header=x-buildbuddy-api-key=YOUR_API_KEY_HERE
-
-          # cross compile for linux (if on macOS) with rbe
-          # build:rbe --host_cpu=k8
-          # build:rbe --cpu=k8
-        '';
-        linkbazelrc = pkgs.writeShellScriptBin "linkbazelrc" ''
-          read -p "Create $(pwd)/user.bazelrc?" -n 1 -r
-          echo
-          if [[ $REPLY =~ ^[^Nn]$ ]]; then
-            ln -s ${user-bazelrc-text} user.bazelrc
-          fi
-        '';
         openWrapper = pkgs.writeShellScriptBin "open" ''
           exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
         '';
@@ -109,23 +52,20 @@
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.gnumake
-            bazel_5
             pkgs.mandoc
             pkgs.openssl
             pkgs.python3
-            erlang
-            rebar3
-            elixir
             java
-            linkbazelrc
             openWrapper
             # For building OTP by hand:
             pkgs.ncurses
             pkgs.libxml2
             pkgs.libxslt
-            # YAML generation/manipulation for testing in k8s
+            # Kubernetes testing
             pkgs.ytt
-          ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [perf mkflamegraph pkgs.perf-test pkgs.hotspot]);
+            pkgs.kubectl
+            (pkgs.google-cloud-sdk.withExtraComponents [pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin])
+          ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [perf mkflamegraph perf-test pkgs.hotspot]);
           shellHook = ''
             export CC=${pkgs.clang}/bin/clang
 
