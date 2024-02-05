@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "flamegraph-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1663461659,
-        "narHash": "sha256-1Mk+DJKD21YImpWNTBJL2jWaU2LoCLbGa7+FnJc9ZSY=",
-        "owner": "brendangregg",
-        "repo": "FlameGraph",
-        "rev": "d9fcc272b6a08c3e3e5b7919040f0ab5f8952d65",
-        "type": "github"
-      },
-      "original": {
-        "owner": "brendangregg",
-        "repo": "FlameGraph",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1687681650,
@@ -34,7 +18,6 @@
     },
     "root": {
       "inputs": {
-        "flamegraph-src": "flamegraph-src",
         "nixpkgs": "nixpkgs",
         "utils": "utils"
       }
