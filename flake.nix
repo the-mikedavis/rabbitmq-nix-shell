@@ -20,9 +20,24 @@
         openWrapper = pkgs.writeShellScriptBin "open" ''
           exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
         '';
+        erlangPkgs = pkgs.beam.packages.erlangR26;
+        # rebar's package runs its whole test suite, running for minutes :/
+        rebar3 = erlangPkgs.rebar3.overrideAttrs (final: prev: { doCheck = false; });
       in {
         devShells.default = pkgs.mkShell {
           packages = [
+            erlangPkgs.erlang
+            erlangPkgs.elixir
+            rebar3
+            # Building OTP:
+            pkgs.ncurses
+            pkgs.libxml2
+            pkgs.libxslt
+            # Building running and documenting rabbit
+            pkgs.gnumake
+            pkgs.mandoc
+            pkgs.openssl
+            pkgs.python3
             perf-test
             # Kubernetes testing
             pkgs.ytt
@@ -33,6 +48,7 @@
             # This is used by perf-test. I can't tell what sets it in the first place :/
             unset SIZE
           '';
+          MAKEFLAGS = "--jobs=16 --no-print-directory";
         };
       });
 }
