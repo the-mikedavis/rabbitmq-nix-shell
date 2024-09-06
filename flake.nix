@@ -20,7 +20,7 @@
         openWrapper = pkgs.writeShellScriptBin "open" ''
           exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
         '';
-        erlangPkgs = pkgs.beam.packages.erlangR26;
+        erlangPkgs = pkgs.beam.packages.erlang_26;
         # rebar's package runs its whole test suite, running for minutes :/
         rebar3 = erlangPkgs.rebar3.overrideAttrs (final: prev: { doCheck = false; });
       in {
