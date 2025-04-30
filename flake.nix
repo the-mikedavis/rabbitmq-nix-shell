@@ -43,6 +43,7 @@
             pkgs.openssl
             pkgs.python3
             perf-test
+            pkgs.p7zip
             # Kubernetes testing
             pkgs.ytt
             pkgs.kubectl
