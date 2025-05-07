@@ -1,5 +1,4 @@
 .direnv
-.envrc
 /*/
 !/bazel_5/
 *.erlang_ls.config
