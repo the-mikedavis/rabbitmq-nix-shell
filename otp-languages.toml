@@ -1,0 +1,3 @@
+[[language]]
+name = "erlang"
+indent = { tab-width = 8, unit = "    " }
