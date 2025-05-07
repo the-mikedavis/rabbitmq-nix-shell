@@ -47,7 +47,8 @@
             # Kubernetes testing
             pkgs.ytt
             pkgs.kubectl
-            (pkgs.google-cloud-sdk.withExtraComponents [pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin])
+            # ... on AWS
+            pkgs.awscli2
           ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [openWrapper pkgs.linuxPackages-libre.perf pkgs.hotspot]);
           shellHook = ''
             # This is used by perf-test. I can't tell what sets it in the first place :/
