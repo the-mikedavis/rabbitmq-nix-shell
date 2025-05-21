@@ -24,7 +24,14 @@
           openWrapper = pkgs.writeShellScriptBin "open" ''
             exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
           '';
-          erlangPkgs = pkgs.beam.packages.erlang_27;
+          # Build Erlang/OTP 28 before it becomes available in nixpkgs.
+          erlang_28 = pkgs.beam.beamLib.callErlang ./28.nix {
+            parallelBuild = true;
+            wxSupport = false;
+            systemdSupport = false;
+          };
+          # Use that for all other packages.
+          erlangPkgs = pkgs.beam.packagesWith erlang_28;
           # rebar's package runs its whole test suite, running for minutes :/
           rebar3 = erlangPkgs.rebar3.overrideAttrs (final: prev: { doCheck = false; });
         in
