@@ -43,6 +43,7 @@
             erlangPkgs.erlang
             erlangPkgs.elixir
             rebar3
+            erlangPkgs.erlfmt
             # Building OTP:
             pkgs.ncurses
             pkgs.libxml2
