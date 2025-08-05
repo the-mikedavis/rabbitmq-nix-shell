@@ -55,10 +55,11 @@
             pkgs.ncurses
             pkgs.libxml2
             pkgs.libxslt
+            pkgs.pkg-config
+            pkgs.openssl
             # Building running and documenting rabbit
             pkgs.gnumake
             pkgs.mandoc
-            pkgs.openssl
             pkgs.python3
             perf-test
             stream-perf-test
@@ -74,6 +75,9 @@
             unset SIZE
           '';
           MAKEFLAGS = "--jobs=16 --no-print-directory";
+          # ./configure --with-ssl=$OTP_WITH_SSL_PATH --with-ssl-incl=$OTP_WITH_SSL_INCL_PATH
+          OTP_WITH_SSL_PATH = lib.getOutput "out" pkgs.openssl;
+          OTP_WITH_SSL_INCL_PATH = lib.getDev pkgs.openssl;
         });
     };
 }
