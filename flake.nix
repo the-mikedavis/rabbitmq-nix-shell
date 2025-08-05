@@ -21,6 +21,13 @@
           perf-test = pkgs.writeShellScriptBin "perf-test" ''
             ${pkgs.openjdk}/bin/java -jar ${perf-test-jar} "$@"
           '';
+          stream-perf-test-jar = pkgs.fetchurl {
+            url = "https://github.com/rabbitmq/rabbitmq-stream-perf-test/releases/download/v1.5.0/stream-perf-test-1.5.0.jar";
+            sha256 = "QPlsNAPmKaziITuQ2CLYSAireIWlYw/CrsxmHx2gmj8=";
+          };
+          stream-perf-test = pkgs.writeShellScriptBin "stream-perf-test" ''
+            ${pkgs.openjdk}/bin/java -jar ${stream-perf-test-jar} "$@"
+          '';
           openWrapper = pkgs.writeShellScriptBin "open" ''
             exec "${pkgs.xdg-utils}/bin/xdg-open" "$@" 
           '';
@@ -54,6 +61,7 @@
             pkgs.openssl
             pkgs.python3
             perf-test
+            stream-perf-test
             pkgs.p7zip
             # Kubernetes testing
             pkgs.ytt
