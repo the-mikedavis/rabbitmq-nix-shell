@@ -65,11 +65,11 @@
             stream-perf-test
             pkgs.p7zip
             # Kubernetes testing
-            pkgs.ytt
-            pkgs.kubectl
+            # pkgs.ytt
+            # pkgs.kubectl
             # ... on AWS
             pkgs.awscli2
-          ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [openWrapper pkgs.linuxPackages-libre.perf pkgs.hotspot]);
+          ] ++ (pkgs.lib.optionals pkgs.stdenv.isLinux [openWrapper pkgs.linuxPackages-libre.perf]);
           shellHook = ''
             # This is used by perf-test. I can't tell what sets it in the first place :/
             unset SIZE
